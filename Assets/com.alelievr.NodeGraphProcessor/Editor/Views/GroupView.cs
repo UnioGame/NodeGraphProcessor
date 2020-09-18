@@ -22,7 +22,9 @@ namespace GraphProcessor
         {
             styleSheets.Add(Resources.Load<StyleSheet>(groupStyle));
 		}
-
+		
+		private static void BuildContextualMenu(ContextualMenuPopulateEvent evt) {}
+		
 		public void Initialize(BaseGraphView graphView, Group block)
 		{
 			group = block;
@@ -30,7 +32,9 @@ namespace GraphProcessor
 
             title = block.title;
             SetPosition(block.position);
-
+			
+			this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
+			
             headerContainer.Q<TextField>().RegisterCallback<ChangeEvent<string>>(TitleChangedCallback);
             titleLabel = headerContainer.Q<Label>();
 
@@ -69,13 +73,31 @@ namespace GraphProcessor
             {
                 var node = element as BaseNodeView;
 
+                // Adding an element that is not a node currently supported
                 if (node == null)
-                    throw new System.ArgumentException("Adding another thing than node is not currently supported");
+                    continue;
 
                 if (!group.innerNodeGUIDs.Contains(node.nodeTarget.GUID))
                     group.innerNodeGUIDs.Add(node.nodeTarget.GUID);
             }
             base.OnElementsAdded(elements);
+        }
+
+        protected override void OnElementsRemoved(IEnumerable<GraphElement> elements)
+        {
+            // Only remove the nodes when the group exists in the hierarchy
+            if (parent != null)
+            {
+                foreach (var elem in elements)
+                {
+                    if (elem is BaseNodeView nodeView)
+                    {
+                        group.innerNodeGUIDs.Remove(nodeView.nodeTarget.GUID);
+                    }
+                }
+            }
+
+            base.OnElementsRemoved(elements);
         }
 
         public void UpdateGroupColor(Color newColor)
