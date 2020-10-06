@@ -570,7 +570,7 @@ namespace GraphProcessor
 				//skip if the field is not serializable
 				if(!field.IsPublic && field.GetCustomAttribute(typeof(SerializeField)) == null)
 				{
-					AddEmptyField(field);
+					AddEmptyField(field, fromInspector);
 					continue;
 				}
 
@@ -581,14 +581,14 @@ namespace GraphProcessor
 				bool showAsDrawer			   = !fromInspector && field.GetCustomAttribute(typeof(ShowAsDrawer)) != null;
 				if (field.GetCustomAttribute(typeof(SerializeField)) == null && hasInputOrOutputAttribute && !showAsDrawer)
 				{
-					AddEmptyField(field);
+					AddEmptyField(field, fromInspector);
 					continue;
 				}
 
 				//skip if marked with NonSerialized or HideInInspector
 				if (field.GetCustomAttribute(typeof(System.NonSerializedAttribute)) != null || field.GetCustomAttribute(typeof(HideInInspector)) != null)
 				{
-					AddEmptyField(field);
+					AddEmptyField(field, fromInspector);
 					continue;
 				}
 
@@ -596,14 +596,14 @@ namespace GraphProcessor
 				var showInInspector = field.GetCustomAttribute<ShowInInspector>();
 				if (showInInspector != null && !showInInspector.showInNode && !fromInspector)
 				{
-					AddEmptyField(field);
+					AddEmptyField(field, fromInspector);
 					continue;
 				}
 
 				var showInputDrawer = field.GetCustomAttribute(typeof(InputAttribute)) != null && field.GetCustomAttribute(typeof(SerializeField)) != null;
 				showInputDrawer |= field.GetCustomAttribute(typeof(InputAttribute)) != null && field.GetCustomAttribute(typeof(ShowAsDrawer)) != null;
 				showInputDrawer &= !fromInspector; // We can't show a drawer in the inspector
-				showInputDrawer &= typeof(IEnumerable).IsAssignableFrom(field.FieldType);
+				showInputDrawer &= !typeof(IList).IsAssignableFrom(field.FieldType);
 
 				var elem = AddControlField(field, ObjectNames.NicifyVariableName(field.Name), showInputDrawer);
 				if (hasInputAttribute)
@@ -618,9 +618,9 @@ namespace GraphProcessor
 			}
 		}
 
-		private void AddEmptyField(FieldInfo field)
+		private void AddEmptyField(FieldInfo field, bool fromInspector)
 		{
-			if(field.GetCustomAttribute(typeof(InputAttribute)) == null) return;
+			if(field.GetCustomAttribute(typeof(InputAttribute)) == null || fromInspector) return;
 			
 			var box = new VisualElement {name = field.Name};
 			box.AddToClassList("port-input-element");

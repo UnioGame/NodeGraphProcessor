@@ -43,7 +43,7 @@ public class SubNode : BaseNode
 ### Unity Compatible versions
 
 This project requires at least Unity **2019.3** with a scripting runtime version of 4.x in player settings.
-The current Unity version used for the project is **2019.3.12f1**
+The current Unity version used for the project is **2019.3.12f1**, **2020.1.0+** is fine too.
 
 ### Installation
 
@@ -154,3 +154,6 @@ For more details consult our [Github Project page](https://github.com/alelievr/N
 
 #### Field Drawers (Thanks [@TeorikDeli](https://github.com/TeorikDeli)!)
 ![](https://user-images.githubusercontent.com/6877923/92417811-775f9d80-f164-11ea-9031-e6b61c98b88e.png)
+
+### Sticky Notes (2020.1 or more required)
+![image](https://user-images.githubusercontent.com/6877923/94344807-208e0b00-0022-11eb-9f93-62acd6478e30.png)

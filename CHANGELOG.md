@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.0.0]
 
 ### Added
+- Added sticky notes (only for 2020.1+)
+
+## [0.9.0]
+
+### Added
 - Added the [ShowAsDrawer] Attribute to display a drawer beside an input port
 
 ### Fixed
