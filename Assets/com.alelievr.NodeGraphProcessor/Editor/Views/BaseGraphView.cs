@@ -321,10 +321,11 @@ namespace GraphProcessor
 						case EdgeView edge:
 							Disconnect(edge);
 							return true;
-						case BaseNodeView node:
-							ExceptionToLog.Call(() => node.OnRemoved());
-							graph.RemoveNode(node.nodeTarget);
-							RemoveElement(node);
+						case BaseNodeView nodeView:
+							nodeInspector.NodeViewRemoved(nodeView);
+							ExceptionToLog.Call(() => nodeView.OnRemoved());
+							graph.RemoveNode(nodeView.nodeTarget);
+							RemoveElement(nodeView);
 							if (Selection.activeObject == nodeInspector)
 								UpdateNodeInspectorSelection();
 							return true;
@@ -604,6 +605,14 @@ namespace GraphProcessor
 			// so the one that are not serialized need to be synchronized)
 			graph.Deserialize();
 
+			// Get selected nodes
+			var selectedNodeGUIDs = new List<string>();
+			foreach (var e in selection)
+			{
+				if (e is BaseNodeView v && this.Contains(v))
+					selectedNodeGUIDs.Add(v.nodeTarget.GUID);
+			}
+	
 			// Remove everything
 			RemoveNodeViews();
 			RemoveEdges();
@@ -623,6 +632,15 @@ namespace GraphProcessor
 			Reload();
 
 			UpdateComputeOrder();
+
+			// Restore selection after re-creating all views
+			// selection = nodeViews.Where(v => selectedNodeGUIDs.Contains(v.nodeTarget.GUID)).Select(v => v as ISelectable).ToList();
+			foreach (var guid in selectedNodeGUIDs)
+			{
+				AddToSelection(nodeViews.FirstOrDefault(n => n.nodeTarget.GUID == guid));
+			}
+
+			UpdateNodeInspectorSelection();
 		}
 
 		public void Initialize(BaseGraph graph)
@@ -632,6 +650,7 @@ namespace GraphProcessor
 				SaveGraphToDisk();
 				// Close pinned windows from old graph:
 				ClearGraphElements();
+				NodeProvider.UnloadGraph(graph);
 			}
 
 			this.graph = graph;
@@ -655,6 +674,8 @@ namespace GraphProcessor
 			UpdateComputeOrder();
 
 			InitializeView();
+
+			NodeProvider.LoadGraph(graph);
 		}
 
 		public void ClearGraphElements()
@@ -1207,10 +1228,10 @@ namespace GraphProcessor
 
 		protected virtual void InitializeView() {}
 
-		public virtual IEnumerable< KeyValuePair< string, Type > > FilterCreateNodeMenuEntries()
+		public virtual IEnumerable<(string path, Type type)> FilterCreateNodeMenuEntries()
 		{
 			// By default we don't filter anything
-			foreach (var nodeMenuItem in NodeProvider.GetNodeMenuEntries())
+			foreach (var nodeMenuItem in NodeProvider.GetNodeMenuEntries(graph))
 				yield return nodeMenuItem;
 
 			// TODO: add exposed properties to this list
@@ -1238,6 +1259,7 @@ namespace GraphProcessor
 			RemoveFromHierarchy();
 			Undo.undoRedoPerformed -= ReloadView;
 			Object.DestroyImmediate(nodeInspector);
+			NodeProvider.UnloadGraph(graph);
         }
 
         #endregion
