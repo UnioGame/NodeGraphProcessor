@@ -10,10 +10,6 @@
 /.vs/
 
 #meta
-/[Dd]ocs/**/*.meta
-/[Pp]rojectSettings/**/*.meta
-/UIElementsSchema/**/*.meta
-/UserSettings/**/*.meta
 /Packages/**/*.meta
 /docs.meta
 /LICENSE.meta
