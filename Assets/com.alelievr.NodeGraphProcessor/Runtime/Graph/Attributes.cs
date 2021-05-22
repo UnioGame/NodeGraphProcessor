@@ -48,6 +48,14 @@ namespace GraphProcessor
 	}
 
 	/// <summary>
+	/// Creates a vertical port instead of the default horizontal one
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+	public class VerticalAttribute : Attribute
+	{
+	}
+
+	/// <summary>
 	/// Register the node in the NodeProvider class. The node will also be available in the node creation window.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
@@ -154,6 +162,23 @@ namespace GraphProcessor
 		public CustomPortBehaviorAttribute(string fieldName)
 		{
 			this.fieldName = fieldName;
+		}
+	}
+
+	/// <summary>
+	/// Allow to bind a method to generate a specific set of ports based on a field type in a node
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	public class CustomPortTypeBehavior : Attribute
+	{
+		/// <summary>
+		/// Target type
+		/// </summary>
+		public Type type;
+
+		public CustomPortTypeBehavior(Type type)
+		{
+			this.type = type;
 		}
 	}
 

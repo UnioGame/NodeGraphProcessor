@@ -51,12 +51,12 @@ namespace GraphProcessor
 				return;
 			}
 
-			output = parameter.serializedValue.value;
+			output = parameter.value;
 		}
 
-		void OnParamChanged(string modifiedParameterName)
+		void OnParamChanged(ExposedParameter modifiedParam)
 		{
-			if (parameter?.name == modifiedParameterName)
+			if (parameter == modifiedParam)
 			{
 				onParameterChanged?.Invoke();
 			}
@@ -71,7 +71,7 @@ namespace GraphProcessor
 				{
 					identifier = "output",
 					displayName = "Value",
-					displayType = (parameter == null) ? typeof(object) : Type.GetType(parameter.type),
+					displayType = (parameter == null) ? typeof(object) : parameter.GetValueType(),
 					acceptMultipleEdges = true
 				};
 			}
@@ -86,16 +86,19 @@ namespace GraphProcessor
 				{
 					identifier = "input",
 					displayName = "Value",
-					displayType = (parameter == null) ? typeof(object) : Type.GetType(parameter.type),
+					displayType = (parameter == null) ? typeof(object) : parameter.GetValueType(),
 				};
 			}
 		}
 
-
 		protected override void Process()
 		{
+#if UNITY_EDITOR // In the editor, an undo/redo can change the parameter instance in the graph, in this case the field in this class will point to the wrong parameter
+			parameter = graph.GetExposedParameterFromGUID(parameterGUID);
+#endif
+
 			if (accessor == ParameterAccessor.Get)
-				output = parameter?.serializedValue.value;
+				output = parameter.value;
 			else
 				graph.UpdateExposedParameter(parameter.guid, input);
 		}

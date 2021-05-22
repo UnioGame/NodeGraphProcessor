@@ -30,6 +30,8 @@ public class RelayNode : BaseNode
 	[System.NonSerialized]
 	int				outputIndex = 0;
 
+	SerializableType inputType = new SerializableType(typeof(object));
+
 	const int		k_MaxPortSize = 14;
 
 	protected override void Process()
@@ -69,6 +71,9 @@ public class RelayNode : BaseNode
 
 		if (outputPort.portData.identifier != packIdentifier && outputIndex >= 0 && (unpackOutput || inputPortEdges.Count == 1))
 		{
+			if (output.values == null)
+				return;
+
 			// When we unpack the output, there is one port per type of data in output
 			// That means that this function will be called the same number of time than the output port count
 			// Thus we use a class field to keep the index.
@@ -86,8 +91,6 @@ public class RelayNode : BaseNode
 				edge.passThroughBuffer = output;
 		}
 	}
-
-	SerializableType inputType = new SerializableType(typeof(object));
 
 	[CustomPortBehavior(nameof(input))]
 	IEnumerable< PortData > InputPortBehavior(List< SerializableEdge > edges)
