@@ -127,6 +127,10 @@ namespace GraphProcessor
 		[NonSerialized]
 		Scene							linkedScene;
 
+		// Trick to keep the node inspector alive during the editor session
+		[SerializeField]
+		internal UnityEngine.Object		nodeInspectorReference;
+
 		//graph visual properties
 		public Vector3					position = Vector3.zero;
 		public Vector3					scale = Vector3.one;
@@ -162,7 +166,7 @@ namespace GraphProcessor
         protected virtual void OnEnable()
         {
 			if (isEnabled)
-				return;
+				OnDisable();
 
 			MigrateGraphIfNeeded();
 			InitializeGraphElements();
@@ -459,7 +463,7 @@ namespace GraphProcessor
 			InitializeGraphElements();
 		}
 
-		void MigrateGraphIfNeeded()
+		public void MigrateGraphIfNeeded()
 		{
 #pragma warning disable CS0618
 			// Migration step from JSON serialized nodes to [SerializeReference]
