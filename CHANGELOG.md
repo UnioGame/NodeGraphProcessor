@@ -4,6 +4,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.0]
+
+### Added
+- Added a callback on the BaseGraph class to know when the asset is deleted on the disk.
+- Added the support of [InspectorName] to change the display name of fields in the node.
+
+### Fixed
+- Fixed relay node not applying custom conversions when needed
+- Fixed the node create menu not listing all nodes when created from edge drag.
+- Fixed Int vector drawer display in nodes.
+- Fixed parameter not editable in Unity 2021.2.
+
+### Changed
+- Deprecated the FieldFactory and [FieldDrawer] system. You can use Unity's CustomPropertyDrawer instead.
+- SerializedProperties are now used to display the properties in the node, so they support Unity's default UI and attributes for all properties.
+
 ## [1.2.0]
 
 ### Added

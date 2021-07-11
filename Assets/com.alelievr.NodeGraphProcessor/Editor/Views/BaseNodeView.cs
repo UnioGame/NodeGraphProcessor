@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using UnityEditor.UIElements;
+using System.Text.RegularExpressions;
 
 using Status = UnityEngine.UIElements.DropdownMenuAction.Status;
 using NodeView = UnityEditor.Experimental.GraphView.Node;
@@ -711,7 +712,13 @@ namespace GraphProcessor
 				showInputDrawer &= !fromInspector; // We can't show a drawer in the inspector
 				showInputDrawer &= !typeof(IList).IsAssignableFrom(field.FieldType);
 
-				var elem = AddControlField(field, ObjectNames.NicifyVariableName(field.Name), showInputDrawer);
+				string displayName = ObjectNames.NicifyVariableName(field.Name);
+
+				var inspectorNameAttribute = field.GetCustomAttribute<InspectorNameAttribute>();
+				if (inspectorNameAttribute != null)
+					displayName = inspectorNameAttribute.displayName;
+
+				var elem = AddControlField(field, displayName, showInputDrawer);
 				if (hasInputAttribute)
 				{
 					hideElementIfConnected[field.Name] = elem;
@@ -746,6 +753,8 @@ namespace GraphProcessor
 
 		void UpdateFieldVisibility(string fieldName, object newValue)
 		{
+			if (newValue == null)
+				return;
 			if (visibleConditions.TryGetValue(fieldName, out var list))
 			{
 				foreach (var elem in list)
@@ -804,21 +813,50 @@ namespace GraphProcessor
 		protected VisualElement AddControlField(string fieldName, string label = null, bool showInputDrawer = false, Action valueChangedCallback = null)
 			=> AddControlField(nodeTarget.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance), label, showInputDrawer, valueChangedCallback);
 
+		Regex s_ReplaceNodeIndexPropertyPath = new Regex(@"(^nodes.Array.data\[)(\d+)(\])");
+		internal void SyncSerializedPropertyPathes()
+		{
+			int nodeIndex = owner.graph.nodes.FindIndex(n => n == nodeTarget);
+
+			// If the node is not found, then it means that it has been deleted from serialized data.
+			if (nodeIndex == -1)
+				return;
+
+			var nodeIndexString = nodeIndex.ToString();
+			foreach (var propertyField in this.Query<PropertyField>().ToList())
+			{
+				propertyField.Unbind();
+				// The property path look like this: nodes.Array.data[x].fieldName
+				// And we want to update the value of x with the new node index:
+				propertyField.bindingPath = s_ReplaceNodeIndexPropertyPath.Replace(propertyField.bindingPath, m => m.Groups[1].Value + nodeIndexString + m.Groups[3].Value);
+				propertyField.Bind(owner.serializedGraph);
+			}
+		}
+
+		protected SerializedProperty FindSerializedProperty(string fieldName)
+		{
+			int i = owner.graph.nodes.FindIndex(n => n == nodeTarget);
+			return owner.serializedGraph.FindProperty("nodes").GetArrayElementAtIndex(i).FindPropertyRelative(fieldName);
+		}
+
 		protected VisualElement AddControlField(FieldInfo field, string label = null, bool showInputDrawer = false, Action valueChangedCallback = null)
 		{
 			if (field == null)
 				return null;
-	
-			var element = FieldFactory.CreateField(field.FieldType, field.GetValue(nodeTarget), (newValue) => {
-				owner.RegisterCompleteObjectUndo("Updated " + newValue);
-				field.SetValue(nodeTarget, newValue);
-				NotifyNodeChanged();
+
+			var element = new PropertyField(FindSerializedProperty(field.Name), showInputDrawer ? "" : label);
+			element.Bind(owner.serializedGraph);
+
+#if UNITY_2020_3 // In Unity 2020.3 the empty label on property field doesn't hide it, so we do it manually
+			if ((showInputDrawer || String.IsNullOrEmpty(label)) && element != null)
+				element.AddToClassList("DrawerField_2020_3");
+#endif
+
+			element.RegisterValueChangeCallback(e => {
+				UpdateFieldVisibility(field.Name, field.GetValue(nodeTarget));
 				valueChangedCallback?.Invoke();
-				UpdateFieldVisibility(field.Name, newValue);
-				// When you have the node inspector, it's possible to have multiple input fields pointing to the same
-				// property. We need to update those manually otherwise they still have the old value in the inspector.
-				UpdateOtherFieldValue(field, newValue);
-			}, showInputDrawer ? "" : label);
+				NotifyNodeChanged();
+			});
 
 			// Disallow picking scene objects when the graph is not linked to a scene
 			if (element != null && !owner.graph.IsLinkedToScene())
@@ -843,9 +881,9 @@ namespace GraphProcessor
 				}
 				else
 				{
-					element.name = field.Name;
 					controlsContainer.Add(element);
 				}
+				element.name = field.Name;
 			}
 			else
 			{
@@ -886,12 +924,10 @@ namespace GraphProcessor
 
 			var label = field.GetCustomAttribute<SettingAttribute>().name;
 
-			var element = FieldFactory.CreateField(field.FieldType, field.GetValue(nodeTarget), (newValue) => {
-				owner.RegisterCompleteObjectUndo("Updated " + newValue);
-				field.SetValue(nodeTarget, newValue);
-			}, label);
+			var element = new PropertyField(FindSerializedProperty(field.Name));
+			element.Bind(owner.serializedGraph);
 
-			if(element != null)
+			if (element != null)
 			{
 				settingsContainer.Add(element);
 				element.name = field.Name;
