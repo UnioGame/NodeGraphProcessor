@@ -643,9 +643,10 @@ namespace GraphProcessor
 							{
 								var node = BaseNode.CreateFromType(kp.Value.nodeType, mousePos);
 								if ((bool)kp.Value.initalizeNodeFromObject.Invoke(node, new []{obj}))
+								{
 									AddNode(node);
-								else
-									break;	
+									break;
+								}
 							}
 							catch (Exception exception)
 							{
@@ -924,12 +925,9 @@ namespace GraphProcessor
 					selectedNodeViews.Add(v);
 			}
 
-			if (selectedNodeViews.Count > 0)
-			{
-				nodeInspector.UpdateSelectedNodes(selectedNodeViews);
-				if (Selection.activeObject != nodeInspector)
-					Selection.activeObject = nodeInspector;
-			}
+			nodeInspector.UpdateSelectedNodes(selectedNodeViews);
+			if (Selection.activeObject != nodeInspector && selectedNodeViews.Count > 0)
+				Selection.activeObject = nodeInspector;
 		}
 
 		public BaseNodeView AddNode(BaseNode node)

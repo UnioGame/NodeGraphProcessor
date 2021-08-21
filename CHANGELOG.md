@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.0]
+
+### Fixed
+- Fixed fields with [Settings] attribute not showing up with inheritance.
+- Fixed selection still active when selecting nodes without inspector fields.
+
+### Changed
+- Fields with both attributes [SerializeField] and [ShowInInspector] are now visible in both the node and inspector.
+
 ## [1.3.0]
 
 ### Added
