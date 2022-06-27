@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using GraphProcessor;
-using System.Linq;
+﻿using GraphProcessor;
 
 [System.Serializable, NodeMenuItem("Operations/Sub")]
 public class SubNode : BaseNode

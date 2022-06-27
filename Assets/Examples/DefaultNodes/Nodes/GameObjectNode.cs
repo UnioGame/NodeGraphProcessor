@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using GraphProcessor;
-using System.Linq;
 
 [System.Serializable, NodeMenuItem("Custom/Game Object")]
 public class GameObjectNode : BaseNode, ICreateNodeFrom<GameObject>

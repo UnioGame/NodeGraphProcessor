@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using GraphProcessor;
-using System.Linq;
 
 [System.Serializable, NodeMenuItem("Custom/Inheritance1")]
 public class Inheritance1 :InheritanceBase 

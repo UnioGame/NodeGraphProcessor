@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using GraphProcessor;
+﻿using GraphProcessor;
 
 [System.Serializable, NodeMenuItem("Primitives/Float")]
 public class FloatNode : BaseNode

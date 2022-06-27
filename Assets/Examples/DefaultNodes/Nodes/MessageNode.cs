@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using GraphProcessor;
-using System.Linq;
+﻿using GraphProcessor;
 
 [System.Serializable, NodeMenuItem("Custom/MessageNode")]
 public class MessageNode : BaseNode

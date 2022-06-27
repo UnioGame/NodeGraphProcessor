@@ -1,4 +1,3 @@
-using UnityEngine;
 using GraphProcessor;
 
 [System.Serializable, NodeMenuItem("Custom/Vertical 2")]
